@@ -426,7 +426,7 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
     }
     ``` 
     - return을 class로 넘겨준다.
-    - class에는 getter와 setter가 있어야 하는데 이는 ctrl+insert(나같은 경우 ctrl+function+delete)를 눌러줘서 getter and setter 클릭
+    - class에는 getter와 setter가 있어야 하는데 이는 alt+insert(나같은 경우 alt+function+delete)를 눌러줘서 getter and setter 클릭
     - 참고로, 인텔리제이에서 자동완성 단축키는 ctrl+shift+enter 이다.
     - getter, setter 란 java bin 규약이라고 함
       - private String name 같은 경우 private이니까 외부에서 못 꺼내니까 외부에서 사용할려면 이러한 getter나 setter를 통해서 접근을 하게 됨.
@@ -460,3 +460,301 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
     - view 이런거 없이 바로 http response에 다가 바로 줌.
 
 ---
+---
+## 섹션 3. 회원 관리 예제 - 백엔드 개발
+---
+---
+
+- 비즈니스 요구사항 정리
+- 회원 도메인과 리포지토리 만들기
+- 회원 리포지토리 테스트 케이스 작성
+- 회원 서비스 개발
+- 회원 서비스 테스트 ( → junit이라는 test 프레임워크로 만들거임)
+
+---
+
+### 비즈니스 요구사항 정리
+
+간단하게 하겠음.
+- 데이터: 회원 ID, 이름
+- 기능: 회원 등록, 조회
+- 가상의 시나리오: 아직 데이터 저장소가 선정되지 않았다.
+  - ex> 개발자가 개발을 해야하는데 DB가 선정이 안되었을 경우(DB를 관계형 DB를 할지, NoSQL을 할지, 성능이 중요한 DB를 할지 등)인데도 개발을 해야하는 경우
+
+- ![web_application_architecture](./readme_img/web_app_architecture.JPG)
+  - 컨트롤러
+    - 웹 MVC의 컨트롤러의 역할
+  - 서비스
+    - 핵심 비즈니스 로직 구현
+    - EX> 회원은 중복가입이 안된다.
+  - 도메인
+    - 회원, 주문, 쿠폰 등등 처럼 주로 데이터베이스에 저장하고 관리되는 비즈니스 도메인 객체
+  - 서비스
+    - 비즈니스 도메인 객체를 가지고 핵심 비즈니스 로직이 동작하도록 구현한 계층
+
+- 클래스 의존관계
+  - ![class_dependencies](./readme_img/class_dependencies.JPG)
+    - 회원 비지니스 로직에는 MemberService가 있다.
+    - 회원을 저장하는 MemberRepository는 interface로 설계.
+      - Why? 아직 데이터 저장소가 선정되지 않아서
+    - 구현체를 Memory 구현체로 만들 예정
+      - 일단 개발을 해야하니까 memory 모드로 단순하게 만들고 향후 구체적인게 선정되면 바꿔 끼운다(그러므로 interface가 필요)
+  - 아직 데이터 저장소가 선정되지 않아서, 우선 인터페이스로 구현 클래스를 변경할 수 있도록 설계.
+  - 데이터 저장소는 RDB, NoSQL 등등 다양한 저장소를 고민중이 상황으로 가정
+  - 개발을 진행하기 위해서 초기 개발 단계에서 구현체로 가벼운 메모리 기반의 데이터 저장소 사용
+
+---
+
+### 회원 도메인과 리포지토리 만들기
+
+- 일단 코딩
+  - domain package 만들기
+    - Member라는 Class 생성
+      - id와 name이 있다.
+        - 각각 getter setter 생성
+  - repository package 만들기
+    - Member 객체를 저장하는 저장소를 만듦
+    - ![create_interface](./readme_img/create_interface.JPG)
+    - 만들 기능들
+      ```java
+      public interface MemberRepository {
+          Member save(Member member);
+          Optional<Member> findById(Long id);
+          Optional<Member> findByName(String name);
+          List<Member> findAll();
+      }
+      ```
+    - Optional
+      - Java8에 들어간 기능
+      - findById나 findByName으로 가져오는 없을 수 도 있다. 그러면 NULL을 반환되지만 요즘에는 NULL을 처리하는 방법에서 NULL을 그대로 반환하기보다는 Optional이라는 것으로 감싸서 반환하는 것을 선호.
+    - 그런 후, 이 저장소(repository package)에서 findById나 findByName으로 찾아올 수도 있고, findAll로 지금까지 저장된 모든 회원 리스트를 반환하도록 개발할거다.
+  - 구현체 만들기
+    - ![memorymember](./readme_img/memorymember.JPG)
+    interface를 구현해야함
+    ```java
+    ``` 
+      - save를 할때 어딘가에 저장해야함
+        ```java
+        private static Map<Long, Member> store = new HashMap<>();
+        ``` 
+        - 실무에서는 동시성 문제가 있을 수 있어서 공유되어지는 변수일때는 HashMap 대신 ConcurrentHashMap을 사용해야함.
+      - 0,1,2 이렇게 key 값을 생성해주는 존재
+        ```java
+        private static long sequence = 0L;
+        ``` 
+        - 실무에서는 동시성 문제때문에 long 보다는 다른 걸 사용
+      - save
+        ```java()
+        @Override
+        public Member save(Member member) {
+            member.setId(++sequence);
+            store.put(member.getId(), member);
+            return member;
+        }
+        ``` 
+        - store에다가 넣기 전에 member의 id 값을 setting(이름은 save하기전에 넘어왔는 상태임)
+        - 그 후 store에다가 저장(Map에 저장이 됨)
+        - 저장된 결과를 반환.
+      - findByID()
+        - store에서 그냥 꺼내면 됨.
+        - 근데 반환 값이 NULL일 경우가 있을 수도 있으면 Optional로 감싸서 반환해야함. → 그래야 client에서 뭘 할 수가 있음.
+        ```java
+        @Override
+        public Optional<Member> findById(Long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+        ``` 
+      - findByName()
+        ```java
+        @Override
+        public Optional<Member> findByName(String name) {
+            return store.values().stream()
+                .filter(member -> member.getName().equals(name))
+                .findAny();
+        }
+        ``` 
+        - 위에 저거는 java8 람다 기능임.
+        - Map.values().stream() 는 loop로 돌리는 거임
+        - .filter(member -> member.getName().equals(name)) : parameter로 받은 "name"이 같은지 확인
+        - .findAny(); : 그 중 하나라도 찾으면 그 결과가 Optional로 반환
+        - 근데 끝까지 loop 돌렸는데 없으면 Optional에 NULL 포함이 되어서 반환.
+      - findAll()
+        ```java
+        @Override
+        public List<Member> findAll() {
+            return new ArrayList<>(store.values());
+        }
+        ``` 
+        - 자바 실무에서는 List를 많이 사용함.
+          - loop 돌리기 편하고 해서
+        - store에 있는 values는 Member들이니까 Member들이 반환이 됨.
+  - 이렇게 구현한 구현체들이 잘 작동하는 검증해야함.
+    - test case를 작성해서 검증하기.
+
+---
+
+### 회원 리포지토리와 테스트 케이스 작성
+
+    개발한 기능을 실행해서 테스트 할 때 자바의 main 메서드롤 통해서 실행하거나, 웹 애플리케이션의 컨트롤러를 통해서 해당 기능을 실행한다. 이러한 방법은 준비하고 실행하는데 오래 걸리고, 반복 실행하기 어렵고 여러 테스트를 한번에 실행하기 어렵다는 단점이 있다. 이를 해결하고자 자바는 JUnit이라는 프레임워크로 테스트를 실행해서 이러한 문제를 해결한다.
+- 아래와 같이 test할 repository에서의 test할 클래스를 만들어준다.
+  - ![test](./readme_img/test.JPG)
+- @Test를 적어주면 그 아래 method를 실행할 수 있음
+  ```java
+  class MemoryMemberRepositoryTest {
+
+    MemberRepository repository = new MemoryMemberRepository();
+
+    @Test
+    public void save(){
+        Member member = new Member();
+        member.setName("spring");
+
+        repository.save(member);
+
+        Member result = repository.findById(member.getId()).get();
+        //System.out.println("result = " + (result == member));
+        //Assertions.assertEquals(member,result); //org.junit.jupiter.api
+        Assertions.assertThat(member).isEqualTo(result); //org.assertj.core.api
+    }
+  }
+  ```
+    - Optional에서 값을 꺼낼때는 .get()
+    - System.out.println으로 해도 되나 글자를 계속 볼 수는 없으니까
+- save() method test 실행
+  - Case1) org.junit.jupiter.api
+    - 우리가 기대하는 것(member)이 find에서 했을때 튀어나와야함.
+    - ![how_to_run_test](./readme_img/how_run_test.JPG)
+    - 성공 시 초록불
+      - ![success](./readme_img/success.JSP)
+    - 실패 시 빨간불
+      ![fail](./readme_img/fail.JSP)
+  - Case2) org.assertj.core.api(이걸 더 많이 사용)
+    - 영어가 직관전임 → member가 result 똑같아?
+    - ![import](./readme_img/import.JSP)
+      ```java
+      assertThat(member).isEqualTo(result);
+      ``` 
+      이렇게 변경되고 다음부터는 그냥 assertThat으로 치면 됨.
+    - 마찬가지로 성공시 초록불, 실패시 빨간불
+
+Tip: Shift + F6을 누르면 그 아래에 있는 것들 Rename됨.
+- findByName() method test 실행
+  - 일부러 성공
+    ```java
+    @Test
+    public void findByName(){
+        Member member1 = new Member();
+        member1.setName("spring1");
+        repository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("spring2");
+        repository.save(member2);
+
+        Member result = repository.findByName("spring1").get();
+
+        assertThat(result).isEqualTo(member1);
+    }
+    ```
+    - 위 test 경우 "spring1"을 가져오면 result는 member1(setName으로 spring1 저장)이므로 성공
+    
+  - 일부러 실패
+    ```java
+    @Test
+    public void findByName(){
+        Member member1 = new Member();
+        member1.setName("spring1");
+        repository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("spring2");
+        repository.save(member2);
+
+        Member result = repository.findByName("spring2").get();
+
+        assertThat(result).isEqualTo(member1);
+    }   
+    ```
+    - 위 test 경우 "spring2"를 가져오면 result는 member2이다.
+    - 그러므로 member1과 다르므로 실패.
+
+- Class 안 method 전부 Test
+  - ![Test](./readme_img/class_Test.JPG)
+  - class 옆 초록버튼 눌러서 run 하면 됨.
+  - ![look_test_result](./readme_img/look_test_result.JPG)
+    - 둘 다 정상 작동하는 것을 확인할 수 있다.
+
+  - findAll() method Test 실행
+    - 
+    ```java
+    @Test
+    public void findAll(){
+        Member member1 = new Member();
+        member1.setName("spring1");
+        repository.save(member1);
+
+        Member member2 = new Member();
+        member2.setName("spring2");
+        repository.save(member2);
+
+        List<Member> result = repository.findAll();
+
+        assertThat(result.size()).isEqualTo(2);
+    }
+    ```
+      - ![findall](./readme_img/findall.JPG)
+        - 이 method를 개별적으로 test 했을때 성공한 모습
+    - 하지만 class를 test할 경우 error가 난다.
+      - ![testall](./readme_img/testall.JPG)
+        - test 순서는 보장이 안됨.
+          - 모든 test는 순서랑 상관 없이 method별로 따로 동작하게 설계를 해야함.
+        - 위 사진에 따르면, findAll()이 먼저 실행이 됨
+          - 이때, "spring1"과 "spring2"가 저장이 되어버림.
+            - 그래서 findByName()을 할때 뭔가 다른 객체(이전에 저장한 "spring1" 객체)가 나와버림.
+        - 그러면 어떻게 해야하는가?(중요)
+          - test가 하나 끝나면 data를 깔끔하게 clear해줘야함. 
+          - MemoryMemberRepository()만 test하는 거니까 변수를 인터페이스가 아닌 MemoryMemberRepository로 바꾸기.
+            - 
+            ```java
+            MemoryMemberRepository repository = new MemoryMemberRepository();
+            ```
+          - 그 후, main/repository로 가서 구현체에 다가 clear해주는 method 추가
+            - 
+            ```java
+            public void clearStore(){
+                store.clear();
+            }
+            ```
+              - store를 비워줌
+          - @AfterEach (다시 test로 넘어와서)
+            - 어떠한 method가 실행이 끝날때 마다 동작을 함.(call-back method) 
+            - 
+            ```java
+            @AfterEach
+            public void afterEach(){
+                repository.clearStore();
+            }
+            ```
+              - test가 실행이 되고 끝날때마다 한번씩 저장소를 clear 해줌 == test 순서가 상관이 없어짐
+              - ![successall](./readme_img/successall.JPG)
+                - 전부 성공한 모습
+        - 요약
+          - test는 서로 순서와 상관없이(서로 의존관계없이) 설계가 되어야 한다.
+          - 그러기 위해서는 하나의 test가 끝날때마다 뭔가 저장소나 공용 데이터들을 지워줘야 문제가 없다.
+
+- 이렇게 먼저 개발을 한 다음(MemoryMemberRepository)에 쭈욱 개발을 끝낸 후, Test를 작성할 수도 있고,
+- 반대로, Test class를 먼저 작성을 한 뒤, 개발 할 것(MemoryMemberRepository)을 작성을 할 수 도 있다.
+  - 미리 검증할 수 있는 틀을 만들고, 그 후 내가 만들고나서 이 틀에다가 잘 맞춰지는지 검사.
+  - TDD(테스트 주도 개발)이라고 한다.
+  - 즉, test를 만듦 → 구현 class를 만듦 → test해보기.
+
+- 만약 test 해야할게 많다면?
+  - ![manytest](./readme_img/manytest.JPG)
+  - 아니면 gradlew 띄어서 test하기.
+
+- 이 test code가 없이 개발할때는 나혼자는 괜찮지만 여러명에서 같이 개발을 할때, 또 소스코드가 길어질수록 test code없이 개발하는건 거의 불가능.
+
+---
+
+![tomrrow](./readme_img/tomorrow.JPG)
+내일은 회원 서비스 개발 강의부터 시작.
