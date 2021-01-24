@@ -756,5 +756,506 @@ Tip: Shift + F6을 누르면 그 아래에 있는 것들 Rename됨.
 
 ---
 
-![tomrrow](./readme_img/tomorrow.JPG)
-내일은 회원 서비스 개발 강의부터 시작.
+### 회원 서비스 개발
+
+- 회원 서비스 클래스 만들기
+  - 회원 서비스는 회원 리포지터리랑 도메인을 활용해서 실제 비지니스 로직을 작성하는 쪽
+
+- service repository 만들기
+  - MemberService Class 생성
+    - 회원 서비스를 만들려면 MemberRepository가 있어야함
+      ```java
+      private final MemberRepository memberRepository = new MemoryMemberRepository();
+      ``` 
+    - 회원 가입 만들기
+      - memberRepository에서 save만 호출하면 됨.
+      - 그리고 임의로 member의 Id 반환하도록 함.
+      - 근데 비지니스 로직 중 같은 이름의 회원이 있으면 안된다! 라고 잡았다
+      - result가 만약 값이 있으면, 즉 member의 값이 있으면 "이미 존재하는 회원입니다"라고 throw한다.
+        - ifPresent는 null이 아니라 어떤 값이 있으면 동작을 함. Optional이라서 가능함.
+      ```java
+      public Long join(Member member){
+        //같은 이름이 있는 중복 회원x
+        // 깔끔한 모양
+        memberRepository.findByName(member.getName())
+            .ifPresent(m -> {
+                throw new IllegalStateException("이미 존재하는 회원입니다.");
+            });
+        // 이렇게는 잘 안함
+        Optional<Member> result = memberRepository.findByName(member.getName());
+        result.ifPresent(m -> {
+            throw new IllegalStateException("이미 존재하는 회원입니다.");
+        });
+
+        memberRepository.save(member);
+        return member.getId();
+      }
+      ``` 
+      - 그러나, findByName을해서 어떠한 logic이 나오는 거처럼 이런 경우에는 method화 하는것이 좋다.
+        - method화 할 부분 드래그 후, ctrl + alt + m 해서 이름 정해주면 자동으로 method 생성
+        ```java
+        public Long join(Member member){
+        //같은 이름이 있는 중복 회원x
+        // 깔끔한 모양
+        validateDuplicateMember(member);
+                memberRepository.save(member);
+                return member.getId();
+       }
+
+        private void validateDuplicateMember(Member member) {
+            memberRepository.findByName(member.getName())
+                .ifPresent(m -> {
+                    throw new IllegalStateException("이미 존재하는 회원입니다.");
+                });
+        }
+        ```
+    - 전체 회원 조회하는 기능
+      ```java
+      /*
+      전체 회원 조회
+      */
+      public List<Member> findMembers(){
+          return memberRepository.findAll();
+      }
+      ``` 
+    - 한명의 회원 조회 기능
+    ```java
+    /*
+    한명 회원 조회
+     */
+    public Optional<Member> findOne(Long memberId){
+        return memberRepository.findById(memberId);
+    }
+    ``` 
+  - 잘보면 repository는 그냥 단순히 저장소에 뺏다 넣었다하는 느낌, service class는 좀 더 비지니스에 가까움(join,findmembers 등.). 그래서 Service Class는 비지니스에 가까운 느낌으로 해야함.
+
+  - 이제는 회원가입 했을때 중복 회원이면 오류가 발생(exception이 동작)하는 지 검증을 해봐야함.
+    - test case를 활용하여 검증
+- tip : ctrl + alt + v 하면 함수의 반환 값을 추출.
+
+---
+
+### 회원 서비스 테스트
+
+회원 서비스 클래스를 테스트해보자.
+
+- 구현한 클래스를 단축키를 이용해서 편하게 test code 만들기.
+  - ctrl + shift + t
+  - ![create_test_easy](./readme_img/create_test_easy.JPG)
+  - ![test_easy](./readme_img/test_easy.JPG)
+  - ![test_service_easy](./readme_img/test_service_easy2.JPG)
+
+- test code들의 method의 이름은 영어대신 한글로 적어도 됨.
+- 회원 가입을 할려면 Service가 있어야함.
+  ```java
+  MemberService memberService = new MemberService();
+  ``` 
+- test는 이러이러한 상황이 주어져서(given) 어떠한 것을 실행했을때(when) 결과가 이게 나와야 됨!(then) 으로 이루어진다.
+  - given - when - then 문법
+    - given : 이러한 data를 기반으로 하는구나
+    - when : 이러한 것을 검증하는 구나
+    - then : 여기가 검증구간이구나
+- 회원가입 test
+  ```java
+  class MemberServiceTest {
+
+    MemberService memberService = new MemberService();
+
+    @Test
+    void 회원가입() {
+        //given
+        Member member = new Member();
+        member.setName("hello");
+
+        //when
+        Long saveId = memberService.join(member);
+
+        //then
+        Member findMember = memberService.findOne(saveId).get();
+        assertThat(member.getName()).isEqualTo(findMember.getName());
+    }
+  ``` 
+  - !(success_join)(./readme_img/success_join.JPG)
+    - 성공적으로 성공한 모습
+    - 하지만 test는 정상 flow에서 성공하는 것도 중요하지만 예외 flow가 훨씬 더 중요함.
+      - join의 핵심은 중복 가입에 관한 예외가 터지는지도 test해야함.
+  - 예외부분 test
+    - 방법 1) try - catch
+      ```java
+      @Test
+      public void 중복_회원_예외(){
+        //given
+        Member member1 = new Member();
+        member1.setName("spring");
+
+        Member member2 = new Member();
+        member2.setName("spring");
+
+        //when
+        memberService.join(member1);    //이때까지는 문제 없어야 함
+        try {
+            memberService.join(member2);    //이때 예외가 터져야함.
+            fail(); //예외가 터지지 않아서 실패!
+        } catch (IllegalStateException e){
+            assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.");
+            //예외가 터져서 정상적으로 성공한 모습.
+      }
+      ``` 
+    - 방법 2) assertThrows(~~~) (추천)
+      - 어떠한 logic을 할 때 memberService.join(member2)를 넣으면 IllegalStateException의 class가 발생해야됨.
+      ```java
+      @Test
+      public void 중복_회원_예외(){
+        //given
+        Member member1 = new Member();
+        member1.setName("spring");
+
+        Member member2 = new Member();
+        member2.setName("spring");
+
+        //when
+        memberService.join(member1);    //이때까지는 문제 없어야 함
+        assertThrows(IllegalStateException.class,() -> memberService.join(member2));
+      }
+       ``` 
+      - 반환하는 문자가 같은지 확인
+        ```java
+        //when
+        memberService.join(member1);    //이때까지는 문제 없어야 함
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> memberService.join(member2));
+        assertThat(e.getMessage()).isEqualTo("이미 존재하는 회원입니다.");
+        ``` 
+  - 하지만, 회원가입과 중복_회원_예외를 동시에 test하면 실패함.
+    - clear를 해줘야함. 그러나 memberService밖에 없으므로 MemoryMemberRepository 가져와야함
+    ```java
+    MemoryMemberRepository memberRepository = new MemoryMemberRepository();
+
+    @AfterEach
+    public void afterEach(){
+        memberRepository.clearStore();;
+    }
+    ``` 
+    - 성공적으로 동작함.
+  - 근데 test를 할때 서로 다른 인스턴스로 test를 하는것이 바람직하지는 않음. 같은 repository로 test를 해야 맞는거임
+    ```java
+    MemberService memberService = new MemberService();
+    MemoryMemberRepository memberRepository = new MemoryMemberRepository();
+    ```
+    - 해결법
+      - MemberService로 가서 아래와 같이 작성
+        ```java
+        private final MemberRepository memberRepository;
+
+        public MemberService(MemberRepository memberRepository) {
+            this.memberRepository = memberRepository;
+        }
+        ``` 
+      - 즉, memberRepository를 직접 new를 통해 만드는 것이 아닌 외부에서 넣어주도록 바꿈.
+      - test로 넘어와서 코드 수정
+        ```java
+        MemberService memberService;
+        MemoryMemberRepository memberRepository;
+
+        @BeforeEach
+        public void beforeEach(){
+            memberRepository = new MemoryMemberRepository();
+            memberService = new MemberService(memberRepository);
+        }
+        ``` 
+        - @BeforeEach는 method 실행 전에 먼저 실행함.
+        - 즉, test를 실행하기전에 각각 생성을 해줌.(test는 독립적으로 실행이 되어야하기 때문에)
+        - MemberService입장에서 보면, 자기가 직접 new 하지 않고 외부에서 memberRepository를 넣어준다.<strong>(== 이러한 방법을 Dependencies Injection, DI)</strong>라고 한다.
+          1) MemoryMemberRepository를 만들고
+          2) 그 만든 것을 memberRepository에 넣어두고
+          3) MemberService(memeberRepository)를 통해 넣어준다.
+          4) 그러면, 같은 MemoryMemberRepository가 사용이 되는 것이다.
+         
+
+---
+---
+
+## 섹션 4. 스프링 빈과 의존관계
+
+---
+---
+
+### 컴포넌트 스캔과 자동 의존관계 설정
+
+- 지금까지는 MemberService, Repository, Member 객체를 만들었고, Service를 통해서 Member를 가입할 수 있고 Repository에 저장이 되고 Repository에서 꺼내올 수 있는 로직들을 만들고, test도 만들었었다.<br/>
+
+- 화면을 붙이고 싶은데 그럴려면 controller랑 view template이 필요하다. 회원가입하고 회원가입된 결과를 html로 뿌려주는 것.
+- 이를 할려면, membercontroller를 만들어야하는데 membercontroller가 memberService를 통해서 회원가입하고 memberService를 통해서 data를 조회할 수 있어야한다.
+- 그렇게 되는것을 <strong>'membercontroller가 memberService를 의존한다'</strong>라고 표현한다.
+
+- memberController 생성
+  - ![membercontroller](./readme_img/membercontroller.JPG)
+    ```java
+    package hello.hellospring.controller;
+
+    import org.springframework.stereotype.Controller;
+
+    @Controller
+    public class MemberController {
+
+    }
+    ``` 
+    - 이렇게 만들어 놓으면 기능은 아무것도 없지만, spring이 처음 시작할때 spring 컨테이너라는 통이 생기는데 거기에 @Controller 이 있으면 해당 class 객체를 생성(여기서는 MemberController)을 해서 spring에 넣어주고 spring이 관리를 한다.
+      - 이러한 과정을, <strong>'spring 컨테이너에서 spring bin이 관리된다.'</strong>라고 표현을 한다.
+  - 어쨋든 memberController는 이제 memberService를 가져다가 사용해야함.
+    - spring이 관리를 하게 되면, 다 spring 컨테이너에 등록을 하게되고 spring 컨테이너로부터 받아서 쓰도록 바꿔야한다.
+      - 만약, new를 해서 할 경우의 문제는, MemberController말고 다른 여러 controller들이 MemberService를 가져다가 쓸 수 있는데, 사실 얘는 하나만 생성해놓고 공용으로 사용하면 됨.
+        ```java
+        public class MemberController{
+          private final MemberService memberService = new MemberService();
+        }
+        ``` 
+      - <strong>그래서 위 방법으로 사용하는 것 보다는, spring 컨테이너에 등록을하고 사용하면 됨.</strong>
+        - spring 컨테이너에 등록하면 딱 하나만 등록이 되며, 그 외 여러가지고 부가적인 효과를 볼 수 있음.
+        - 생성자를 만들고 위에 @Autowired Annotation 기입
+          - 이 MemberController가 spring이 뜰 때 생성을 하는데, 그러면 이때 생성자를 호출을 하는데 생성자에 @Autowired가 되어있으면 spring 컨테이너에 있는 MemberService를 가져다가 연결을 시켜줌.
+            ```java
+            @Controller
+            public class MemberController {
+
+                private final MemberService memberService;
+
+                @Autowired
+                public MemberController(MemberService memberService){
+                    this.memberService = memberService;
+                }
+            }
+            ``` 
+          - 그런데 이렇게 돌리면 실패함.
+          - 왜냐하면 MemberService를 보면 MemberService는 순수한 java Class이다. 즉, spring이 알 수 있는 방법이 없다.(annotation이런것도 없으니까)
+            - 그러면 MemberService에다가 @Service 를 기입.
+            ```java
+            @Service
+            public class MemberService {
+              ~~~
+            }
+            ``` 
+            - @Service란 spring이 뜰때, spring 컨테이너에 service를 등록해줌.
+          - repository도 마찬가지로 @Repository 기입
+            ```java
+            @Repository
+            public class MemoryMemberRepository implements MemberRepository{
+              ~~~
+            }
+            ``` 
+- Controller, Service, Repository는 졍형화된 패턴이다.
+  - controller를 통해서 외부 요청을 받고,
+  - service에서 비지니스 로직을 만들고,
+  - repository에서 데이터를 저장함
+  - 이러한 것들을 annotation하면, spring이 뜰때 controller, service, repository를 컨테이너로 가져온다.
+  - 그리고, 아래 그림처럼 controller랑 service를 연결시켜주어야한다.
+    - ![spring_bin_img](./readme_img/spring_bin_img.JPG)
+  - 이 연결시켜줄때 @Autowired를 사용하면 컨테이너에서 연결이 된다~.
+    ```java
+    @Controller
+    public class MemberController {
+
+      private final MemberService memberService;
+
+      @Autowired
+      public MemberController(MemberService memberService){
+          this.memberService = memberService;
+      }
+
+    }
+    ``` 
+    - 즉, 생성자에 @Autowired를 쓰면, MemberController가 생성이 될 때, Spring bin에 등록되어 있는 MemberService 객체를 가져다가 넣어준다.
+      - 이러한 방식을 Dependencies Injection이라고 한다.
+      - 의존관계를 주입한다.(spring이 주입)
+    - MemberService와 MemberRepository도 마찬가지로 연결.
+      ```java
+      @Autowired
+      public MemberService(MemberRepository memberRepository) {
+          this.memberRepository = memberRepository;
+      }
+      ```
+      - spring이 뜰 때, Service로 등록을 하면서 생성자를 호출하는데 @Autowired이므로 확인하면서 MemberRepository가 필요하다고 인식하여 spring 컨테이너에 있는 MemberRepository를 넣어준다.
+      - 지금같은 경우, MemoryMemberRepository가 구현체로 있으므로 MemeryMemberRepository를 Service에 주입을 해준다.
+      - memberService는 memberRepository가 필요하다.
+    - 그러면, 3개가 연결이 됨.
+
+- 이후, main을 돌려보면 문제없이 돌아감(==컨테이너에서 연결하는 것은 문제가 없다를 의미)
+
+---
+
+### 정리
+  - 스프링 빈을 등록하는 2가지 방법(2가지를 전부 알아야 함.)
+    1. 컴포넌트 스캔과 자동 의존관계 설정
+       - 위에서 한 방식 (@Controller, @Service ,@Repository)이 이 방식임.
+       - @Component 가 있으면 spring bin으로 자동 등록이 됨.
+         - spring을 사용하면 웬만한 것들은 spring bin으로 등록을 해서 써야함.
+       - @Controller 가 spring bin으로 자동 등록된 이유도 컴포넌트 스캔 때문이다.
+       - @Component를 포함하는 다음 Annotation도 spring bin으로 자동 등록이 된다.
+         - @Controller
+         - @Service
+         - @Repository
+      - 그러면, 아무곳에나 @Component를 선언하면 되나?
+        - No
+        - hello.hellospring부터 시작해서 그 하위 폴더들을 뒤지면서 spring bin으로 등록하는데, 하위 폴더들이 아닌 경우에는 spring bin으로 등록을 안하기 때문.
+          - ![bin_demo](./readme_img/bin_demo.JPG)
+          - 위 사진 처럼 demo 폴더는 hello.hellospring의 하위 폴더가 아니므로 컴포넌트 스캔의 대상이 안되므로 spring bin에 등록이 안됨.
+      - 참고
+        - spring은 spring 컨테이너에 spring bin을 등록할 때, 기본으로 싱글톤(즉, 하나만)으로 등록한다.(유일하게 하나만 등록해서 공유함.)
+        - 따라서, 같은 spring bin이면 모두 같은 인스턴스이다.
+        - 설정으로 싱글톤이 아니게하는 방법들도 있지만, 특별한 경우를 제외하면 대부분 싱글톤을 사용한다.
+
+    2. 자바 코드로 직접 스프링 빈 등록하기 
+       - ![springconfig](./readme_img/springconfig.JPG)
+       - memberservice
+        ```java
+        @Configuration
+        public class SpringConfig {
+
+            @Bean
+            public MemberService memberService(){
+                return new MemberService();//근데 생성자에 무언가를 넣어줘야함.
+            }
+        }
+        ``` 
+          - 이렇게하면 spring이 뜰때, @Configuration을 읽고, 이거는 spring bin에 등록하라는 뜻이네하고 spring에 등록을 함.
+          - 그러면서 memberService()를 해당 로직을 호출해서 spring bin에 등록을 해줌.
+        - memberRepository
+          ```java
+          @Bean
+          public MemberRepository memberRepository(){
+              return new MemoryMemberRepository();
+          }
+          ``` 
+          - memberService는 memberRepository와 엮어줘야한다. 그럴때는 아래처럼 해주면 됨.
+          ```java
+          @Bean
+          public MemberService memberService(){
+              return new MemberService(memberRepository());
+          }
+
+          @Bean
+          public MemberRepository memberRepository(){
+              return new MemoryMemberRepository();
+          }
+          ```
+          - 그러면 얘가 뜰때, MemberService와 MemberRepository를 둘 다 spring bin에 등록을 하고, 그러면서 spring bin에 등록되어있는 MemberRepository를 MemberService에 넣어준다.
+        - 그러나 Controller는 어쩔수 없음
+          - 즉, 어차피 spring이 controller를 관리하는거기 때문에 @Controller를 두면, 컴포넌트 스캔에 올라가고 컴포넌트 스캔이기때문에 아까 @Bean으로 등록한 @Autowired로 MemberService로 엮임.
+      - main에서 실행하면 정상적으로 spring이 실행되는 것을 볼 수 있음.
+
+  - 위 두가지 방법은 각각의 장단점이있다.
+  - 참고
+    - DI에는 1)필드 주입, 2)setter 주입, 3)생성자 주입 이렇게 3가지 방법이 있다.
+      1) 필드 주입(별로 안좋음, 왜냐 처음에만 넣어주고 중간에 바꿀 수 있는 방법이 아예 없음)
+          - 그냥 필드에다가 바로 @Autowired를 기입
+          - 
+          ```java
+          @Autowired private MemberService memberService;
+          ``` 
+      2) setter 주입
+         - 생성은 생성대로 되고, setter는 나중에 호출이 되어서 memberService가 들어옴.
+         - 단점 : 누군가가 memberController를 호출했을때 setter가 public으로 열려 있어야함. 즉, 노출이 되어 있으므로 중간에 누가 바꾸면 문제가 발생할 수 있음. 원래는 한번 setting이 되고나면 바꿀일이 없음
+          ```java
+          @Autowired
+          public void setMemberService(MemberService memberService){
+              this.memberService = memberService;
+          }
+          ``` 
+      3) 생성자 주입(권장, 처음에 spring 컨테이너에 올라가고 setting이 되면(이를 application이 조립된다고 표현), 그 시점에 한번 딱 들어오고 끝남.)
+          - ex> Controller에서 memberService가 생성자를 통해서 memberController에 주입이 된다.
+          - 
+          ```java
+          @Autowired
+          public MemberController(MemberService memberService){
+              this.memberService = memberService;
+          }
+          ```
+          - 의존관계가 실행중에 동적으로 변하는 경우는 거의 없으므로 생성자 주입을 권장한다.
+
+    - 실무에서는
+      1) 주로 정형화된 controller, service, repository 같은 코드는 컴포넌트 스캔을 사용한다. 
+      2) 그리고 정형화 되지 않거나, 상황에 따라 구현 클래스를 변경해야(중요) 하면 설정을 통해 spring bin으로 등록한다.
+         - 데이터 저장소가 선정되지 않아서 가상의 메모리를 만들고 나중에 교체하자해서 interface로 설계를 하고 구현체로 MemoryMemberRepository로 쓰는 그림이 된거임.
+         - 그런데, 나중에 MEmoryMemberRepository를 다른 Repository로 바꿔치기 할 거임.
+         - 이때, 기존에 운영되던 code를 건들지않고 바꿔치기하는 방법이 있음.
+         - 이걸 하기위해 이렇게 한거임.
+          ```java
+          @Configuration
+          public class SpringConfig {
+
+              @Bean
+              public MemberService memberService(){
+                  return new MemberService(memberRepository());
+              }
+
+              @Bean
+              public MemberRepository memberRepository(){
+                  return new MemoryMemberRepository();
+              }
+          }
+          ``` 
+          이런식으로 되어있는 코드를 나중엔<br/>
+          ```java
+          @Configuration
+          public class SpringConfig {
+
+              @Bean
+              public MemberService memberService(){
+                  return new MemberService(memberRepository());
+              }
+
+              @Bean
+              public MemberRepository memberRepository(){
+                  return new DbMemberRepository();
+              }
+          }
+          ```
+          이렇게 다른코드를 전혀 손댈 필요 없이 바꾸면 됨.
+  - 주의
+    - @Autowired를 통한 DI는 helloController, memberService 등과 같이 spring이 관리하는 객체에서만 동작한다. Spring bin으로 등록하지 않고 내가 직접 생성한 객체에서는 동작하지 않는다.
+
+---
+---
+
+## 섹션 5. 회원 관리 예제 - 웹 MVC 개발
+
+---
+---
+
+### 회원 웹 기능 - 홈 화면 추가
+
+- 이전 시간에는 membercontroller를 만들고, 의존관계 설정했었음.
+- 이제는 membercontroller를 통해서 회원을 등록하고 조회하는 것을 만들어 보겠다.
+
+- 홈 화면 추가
+  - HomeController 생성
+    - ![homecontroller](./readme_img/homecontroller.JPG)
+    - 
+    ```java
+    @Controller
+    public class HomeController {
+
+        @GetMapping("/")
+        public String home(){
+            return "home";
+        }
+    }
+    ```
+      - @GetMapping("/")에서 "/"의 의미는 domain 첫번째, 즉 localhost:8080으로 들어오면 위의 method가 호출이 됨.
+      - 그리고 return "home"이므로, home.html이 호출이 됨(그러면 templates에서 home.html이 있어야 됨).
+  - templates에 home.html 생성
+  - 그리고 실행을하고 localhost:8080으로 접속하면, 아래와 같은 화면이 나온다.
+    - ![hello_spring](./readme_img/hello_spring.JPG)
+  - 그러나, 저번에 static에 index.html을 만들었는데(아무것도 없으면 welcome page라해서 여기로 감) 여기에는 우선순위가 있어서 안 열림.
+    - '정적 컨텐츠 이미지'를 보면 요청이오면 먼저 1) 스프링 컨테이너안에 있는 관련 컨트롤러가 있는지 먼저 찾고 없으면 static 파일을 찾는다.
+    - welcome page도 마찬가지이다. controller를 찾는 중 home화면(@GetMapping("/"))에 mapping된게 있으므로 바로 이 controller가 호출되고 끝남. 그래서 기존에 만들었던 정적 index.html은 무시가 된다.
+
+---
+
+### 회원 웹 기능 - 등록
+
+- 
+- form action="/members/new"에서 "name"과 "id"를 받아오고 등록을 누르면 server로 정보가 넘어간다.
+- ![creatememberform](./readme_img/creatememberform.JPG)
+
+
+---
