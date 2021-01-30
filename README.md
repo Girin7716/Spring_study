@@ -1599,4 +1599,68 @@ public class SpringConfig {
 - JPA를 사용하면, SQL과 데이터 중심의 설계에서 객체 중심의 설계로 패러다임을 전환 할 수 있다.
 - JPA를 사용하면 개발 생산성을 크게 높일 수 있다.
 
+- build.gradle에서 spring-boot-starter-jdbc를 지우고 implementation 'org.springframework.boot:spring-boot-starter-data-jpa' 입력 하고 gradle refresh
+- 그 다음 application.properties로 가서 spring.jpa.show-sql=true 입력
+  - 이렇게하면 jpa가 날리는 sql을 볼 수 있다.
+- spring.jpa.hibernate.dll-auto=none
+  - jpa를 사용하면 객체(ex>회원 객체)를 보고 자동으로 테이블을 만든다.(하지만 우리는 이미 테이블을 만들었기때문에 자동으로 테이블을 생성하는 기능을 꺼준거임.)
+
+- jpa를 사용할려면 entity라는 것을 mapping해줘야한다.
+- jpa라는 것은 인터페이스다
+  - 구현체로 hibernate 등등이 있다.
+- jpa는 객체랑 ORM이라는 기술이다
+  - ORM : Object Relational Mapping
+    - 객체와 관계형 DB의 테이블을 mapping한다.
+    - 어떻게하는가? -> 어노테이션
+
+- Member Class로 들어와서 class 위에 @Entity 입력.
+  - 이 뜻은 JPA가 관리하는 entity가 되는 것을 의미
+  - 그리고 PK를 mapping해줘야한다.
+    - @Id @GenerateValue(strategy = GenerationType.IDENTITY)
+      - IDENTITY 전략 : db가 id를 자동으로 생성해주는 것
+    - 
+    ```java
+    @Entity
+    public class Member {
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    ```
+
+- JpaMemberRepository 생성
+  - EntityManager 생성
+    - 
+    ```java
+    private final EntityManager em;
+    
+    public JpaMemberRepository(EntityManager em) {
+        this.em = em;
+    }
+    ```
+    - Jpa는 entitymanager로 모든 것이 동작을 함.(즉, JPA를 사용할려면 EntityManager라는 것을 주입 받아야한다.)
+    - build.gradle에서 jpa를 라이브러리로 받았는데, 그렇게 하면 spring boot가 자동으로 entitymanager라는 것을 자동으로 생성을 해줌. 현재 db와 연결을 해주어서
+    - 우리는 만들어준 것을 injection 받으면 된다.
+
+- save
+  - 
+  ```java
+  @Override
+    public Member save(Member member) {
+        em.persist(member);
+        return member;
+    }
+  ```
+  - 이렇게하면, JPA가 insert 쿼리 만들어서 db에 집어넣고 id까지 member에다가 setId 해주는 등 모든 것을 다해줌.
+
+
+- findAll
+  - 
+  ```java
+  @Override
+    public List<Member> findAll() {
+        return em.createQuery("select m from Member m", Member.class)
+                .getResultList();
+    }
+  ```
+  
+
 ---
