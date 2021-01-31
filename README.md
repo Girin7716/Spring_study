@@ -4,7 +4,60 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
 
 ---
 ---
-## 섹션 0. 강의소개
+## 목차
+ㄴ
+- [Spring](#spring)
+  - [목차](#목차)
+  - [강의소개](#강의소개)
+    - [간단한 웹 애플리케이션 개발](#간단한-웹-애플리케이션-개발)
+    - [프로젝트 사용기술](#프로젝트-사용기술)
+    - [강의 목표](#강의-목표)
+    - [스프링 완전 정복 로드맵](#스프링-완전-정복-로드맵)
+  - [프로젝트 환경설정](#프로젝트-환경설정)
+    - [스프링 부트 스타터 사이트로 이동해서 스프링 프로젝트 생성](#스프링-부트-스타터-사이트로-이동해서-스프링-프로젝트-생성)
+    - [설치 후 인텔리제이에서 구조 살펴보기](#설치-후-인텔리제이에서-구조-살펴보기)
+    - [한번 돌려보기](#한번-돌려보기)
+  - [- 여기까지 진행했으면 프로젝트 환경 설정에 성공.](#--여기까지-진행했으면-프로젝트-환경-설정에-성공)
+    - [라이브러리 살펴보기](#라이브러리-살펴보기)
+    - [View 환경설정](#view-환경설정)
+    - [Controler](#controler)
+    - [빌드하고 실행하기](#빌드하고-실행하기)
+  - [## 스프링 웹 개발 기초](#-스프링-웹-개발-기초)
+    - [웹을 개발한다는 것](#웹을-개발한다는-것)
+    - [정적 컨텐츠](#정적-컨텐츠)
+    - [MVC와 템플릿 엔진](#mvc와-템플릿-엔진)
+  - [API 방식](#api-방식)
+  - [## 회원 관리 예제 - 백엔드 개발](#-회원-관리-예제---백엔드-개발)
+    - [비즈니스 요구사항 정리](#비즈니스-요구사항-정리)
+    - [회원 도메인과 리포지토리 만들기](#회원-도메인과-리포지토리-만들기)
+    - [회원 리포지토리와 테스트 케이스 작성](#회원-리포지토리와-테스트-케이스-작성)
+    - [회원 서비스 개발](#회원-서비스-개발)
+    - [회원 서비스 테스트](#회원-서비스-테스트)
+  - [스프링 빈과 의존관계](#스프링-빈과-의존관계)
+    - [컴포넌트 스캔과 자동 의존관계 설정](#컴포넌트-스캔과-자동-의존관계-설정)
+    - [정리](#정리)
+  - [회원 관리 예제 - 웹 MVC 개발](#회원-관리-예제---웹-mvc-개발)
+    - [회원 웹 기능 - 홈 화면 추가](#회원-웹-기능---홈-화면-추가)
+    - [회원 웹 기능 - 등록](#회원-웹-기능---등록)
+    - [회원 웹 기능 - 조회](#회원-웹-기능---조회)
+  - [스프링 DB 접근 기술](#스프링-db-접근-기술)
+    - [H2 데이터베이스 설치](#h2-데이터베이스-설치)
+    - [순수 Jdbc](#순수-jdbc)
+    - [스프링 통합 테스트](#스프링-통합-테스트)
+    - [스프링 JdbcTemplate](#스프링-jdbctemplate)
+    - [JPA](#jpa)
+    - [스프링 데이터 JPA](#스프링-데이터-jpa)
+  - [AOP](#aop)
+    - [AOP가 필요한 상황](#aop가-필요한-상황)
+    - [AOP 적용](#aop-적용)
+  - [다음으로](#다음으로)
+    - [이때까지 한 내용](#이때까지-한-내용)
+    - [다음으로](#다음으로-1)
+
+
+---
+---
+## 강의소개
 
 ---
 ---
@@ -52,7 +105,7 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
 ---
 ---
 
-## 섹션 1. 프로젝트 환경설정
+## 프로젝트 환경설정
 
 ---
 ---
@@ -307,7 +360,7 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
 
 ---
 ---
-## 섹션 2. 스프링 웹 개발 기초
+## 스프링 웹 개발 기초
 ---
 ---
 
@@ -461,7 +514,7 @@ https://www.inflearn.com/ 에서 '스프링 입문 - 코드로 배우는 스프링 부트, 웹 MVC,
 
 ---
 ---
-## 섹션 3. 회원 관리 예제 - 백엔드 개발
+## 회원 관리 예제 - 백엔드 개발
 ---
 ---
 
@@ -974,7 +1027,7 @@ Tip: Shift + F6을 누르면 그 아래에 있는 것들 Rename됨.
 ---
 ---
 
-## 섹션 4. 스프링 빈과 의존관계
+## 스프링 빈과 의존관계
 
 ---
 ---
@@ -1216,7 +1269,7 @@ Tip: Shift + F6을 누르면 그 아래에 있는 것들 Rename됨.
 ---
 ---
 
-## 섹션 5. 회원 관리 예제 - 웹 MVC 개발
+## 회원 관리 예제 - 웹 MVC 개발
 
 ---
 ---
@@ -1661,6 +1714,264 @@ public class SpringConfig {
                 .getResultList();
     }
   ```
+  - select m from Member m 
+    - JPQL 이라는 쿼리 언어임.
+    - 테이블 대상으로 쿼리를 날리는 것이아닌, 객체(정확히는 Entity)를 대상으로 쿼리를 날림. 그러면, 이게 SQL로 번역이 된다.
+    - Member Entity를 조회해, member 객체를 select
+    - select를 하는데 member 자체(객체 자체를)를 select함.
+    - 
+
+- findByName
+  - 
+  ```java
+  @Override
+    public Optional<Member> findByName(String name) {
+        List<Member> result = em.createQuery("select m from Member m where m.name= : name", Member.class)
+                .setParameter("name", name)
+                .getResultList();
+        return result.stream().findAny();
+    }
+  ```
+- 여러개의 List를 가지고는 돌릴때는 JPQL을 작성해야함(PK기반이 아니라서)
+
+- JPA를 사용할려면 항상 서비스계층(데이터를 저장하거나 변경할때)에서 @transactional이 있어야 한다.
+
+- Config에서 이제 수정
+  - 
+  ```java
+  private EntityManager em;
+
+    @Autowired
+    public SpringConfig(EntityManager em){
+        this.em = em;
+    }
+  ```
+  추가
+  - 
+  ```java
+  @Bean
+  public MemberRepository memberRepository(){
+      //return new MemoryMemberRepository();
+      //return new JdbcMemberRepository(dataSource);
+      //return new JdbcTemplateMemberRepository(dataSource);
+      return new JpaMemberRepository(em);
+  }
+  ```
+  - 그 후, 통합 test에서 회원가입 돌리면 성공함.
+    - 회원가입 결과를 보면 Hibernate: select member0_.id as id1_0_, member0_.name as name2_0_ from member member0_ where member0_.name=? 와 Hibernate: insert into member (id, name) values (null, ?) 이런게 보임
+  - 이제 같이 class로 돌려보아도 성공함.
+
+---
+
+### 스프링 데이터 JPA
+
+- 스프링 부트와 JPA만 사용해도 개발 생산성이 많이 증가하고, 개발해야할 코드도 확연히 줄어든다.
+- 여기에 스프링 데이터 JPA를 사용하면, 기존의 한계를 넘어, 리포지토리에 구현 클래스 없이 인터페이스 만으로 개발을 완료할 수 있다.
+- 그리고 반복 개발해온 기본 CRUD 기능도 스프링 데이터 JPA가 모두 제공한다,
+- 스프링 부트와 JPA라는 기반 위에, 스프링 데이터 JPA라는 환상적인 프레임워크를 더하면 개발이 즐거워진다.
+- 지금까지 조금이라도 단순하고 반복이라고 생각했던 개발 코드들이 확연하게 줄어든다.
+- 따라서 개발자는 핵심 비즈니스 로직을 개발하는데, 집중할 수 있다.
+- 실무에서 관계형 데이터베이스를 사용한다면 스프링 데이터 JPA는 이제 선택이 아니라 필수이다.
+
+- SpringDataJpaMemberRepository interface 생성
+  - JpaRepository interface를 받아야한다
+  - 
+  ```java
+  public interface SpringDataJpaMemberRepository extends JpaRepository<Member,Long>,MemberRepository {
+    @Override
+    Optional<Member> findByName(String name);
+  }
+  ```
+  - spring data JPA가 JpaRepository를 받고 있으면 구현체를 자동으로 만들어주고 spring bin에 자동으로 등록해줌.
+  - 그리고 우리는 이제 그걸 가져다가 쓰면 됨.
+  - Config로 가서 입력
+  ```java
+  private final MemberRepository memberRepository;
+    @Autowired 
+    public SpringConfig(MemberRepository memberRepository){
+        this.memberRepository = memberRepository;
+    }
+  ```
+    - 그러면 spring data JPA가 구현체로 만들어 놓은 것이 등록이 된다.
+    - 그리고 memberService에다가 의존관계를 setting 해야함.
+    - 그리고 public MemberRepository memberRepository() 이거 주석처리해도 됨
+    - JpaRepository는 spring data JPA가 제공하는 거임
+- 그후 통합 test 돌리면 성공함
+- 어떻게 되었던 것인가?
+  - 스프링 데이터 JPA가 SpringDataJpaMemberRepository를 스프링 빈으로 자동 등록해준다.
+  - 우리는 그것을 injection해서 사용한 거임.
+  - 기본적인 CRUD와 단순 조회 기능들이 스프링 데이터 JPA에서 구현이 되어있어 제공을 해줌.
+  - ![spring_data](./readme_img/spring_data.JPG)
+  - 그러나 만들지 못하는 기능이 있다.
+    - findByName 같은경우
+      - 
+      ```java
+      Optional<Member> findByName(String name);
+      ```
+      findByName에서 Name을 보고 'select m form Member m where m.name = ?' 이런식으로 JPQL을 짜주고 이걸 SQL로 번역이되어서 실행
+    - Ex> findByNameAndId 이런식으로 규칙이 많음
+    - 즉, interface의 이름만으로도 개발이 끝난거다.
+
+- 스프링 데이터 JPA 제공 기능
+  - 인터페이스를 통한 기본적인 CRUD
+  - findByName(), findByEmail() 처럼 메서드 이름 만으로 조회 기능 제공
+  - 페이징 기능 자동 제공
+
+- 참고
+  - 실무에서는 JPA와 스프링 데이터 JPA를 기본으로 사용하고, 복잡한 동적 쿼리는 Querydsl이라는 라이브러리를 사용하면 된다. Querydsl을 사용하면 쿼리도 자바 코드로 안전하게 작성할 수 있고, 동적 쿼리도 편리하게 작성할 수 있다. 이 조합으로 해결하기 어려운 쿼리는 JPA가 제공하는 네이티브 쿼리를 사용하거나, 앞서 학습한 스프링 JdbcTemplate를 사용하면 된다.
+
+- 정리
+  - H2 설치
+  - 순수 Jdbc기술 사용
+    - 쿼리 하나하나 작성이 힘들다.
+  - 스프링 통합 테스트 생성
+  - 스프링 JdbcTemplate으로 바꿔봄
+    - 반복되는 코드가 굉장히 줄어들지만, sql은 직접 작성해야함.
+  - JPA
+    - 기본적인 CRUD하는데 쿼리를 작성할 필요가 없음, 물론 select를 할때는 JPQL을 짜긴 해야함.
+  - 스프링 데이터 JPA
+    - 아예 구현 클래스를 작성할 필요 없이 interface 작성만으로 개발이 끝남.
+
+
+---
+---
+
+## AOP
+
+
+---
+---
+
+### AOP가 필요한 상황
+
+- 모든 메소드의 호출 시간을 측정하고 싶다면?
+  - 상황> 1000개 정도되는 method의 호출 시간을 측정하고싶다
+    - 1000개의 method에 시간 측정 코드 삽입
+    - 근데 s 말고 ms로 바꿔달라고한다
+    - 다시 1000개 코드 수정...
+
+- 위 상황처럼 method에 하나하나 시간 측정 코드를 넣는다면?
+  - 문제
+    - 회원가입, 회원 조회에 시간을 측정하는 기능은 핵심 관심 사항이 아니다.
+    - 시간을 측정하는 로직은 공통 관심 사항이다.
+    - 시간을 측정하는 로직과 핵심 비즈니스의 로직이 섞여서 유지보수가 어렵다.
+    - 시간을 측정하는 로직을 별도의 공통 로직으로 만들기 매우 어렵다.
+    - 시간을 측정하는 로직을 변경할 때 모든 로직을 찾아가면서 변경해야 한다.
+
+- 공통 관심 사항(cross-cutting concern) vs 핵심 관심 사항(core concern)
+- 회원 가입 시간, 회원 조회 시간을 측정하고 싶다면?
+![aop](./readme_img/aop.JPG)
+
+  - 이런식으로 시간 측정 로직을 method에 붙인 형태이다.
+
+---
+
+### AOP 적용
+
+- AOP : Aspect Oriented Programming(관점 지향 프로그래밍)
+- 공통 관심 사항(cross-cutting concern) vs 핵심 관심 사항(core concern) 분리
+![aop2](./readme_img/aop2.JPG)
+  - 시간 측정 로직을 한군데 다 모인 후, 내가 원하는데 적용하는 거임.
+  - 이걸 가능하게한 기술이 AOP
+
+- main/java/hello.hellospring 에 aop 패키지 만들기
+  - TimeTraceAop class 생성
+    -  
+    ```java
+    @Aspect
+    @Component
+    public class TimeTraceAop {
+
+        @Around("execution(* hello.hellospring..*(..))")
+        public Object execute(ProceedingJoinPoint joinPoint) throws Throwable{
+            long start = System.currentTimeMillis();
+            System.out.println("START: " + joinPoint.toString());
+            try {
+                return joinPoint.proceed();
+            } finally {
+                long finish = System.currentTimeMillis();
+                long timeMs = finish - start;
+                System.out.println("END: " + joinPoint.toString() + " " + timeMs + "ms");
+            }
+        }
+    }
+    ```
+- 서버 실행
+![aop_time](./readme_img/aop_time.JPG)
+  - Controller,Service,repository의 시간을 볼 수 있으면 이를 통해 어디서 밀리는지도 알 수 있다.
+
+
+- 해결
+  - 회원가입, 회원 조회등 핵심 관심사항과 시간을 측정하는 공통 관심 사항을 분리한다.
+  - 시간을 측정하는 로직을 별도의 공통 로직으로 만들었다.
+  - 핵심 관심 사항을 깔끔하게 유지할 수 있다.
+    - Service 코드는 바꿀 필요가 없음
+  - 변경이 필요하면 이 로직만 변경하면 된다.
+  - 원하는 적용 대상을 선택할 수 있다.
+    - 
+    ```java
+    @Aspect
+    @Component
+    public class TimeTraceAop {
+
+        @Around("execution(* hello.hellospring.service..*(..))")
+        public Object execute(ProceedingJoinPoint joinPoint) throws Throwable{
+            long start = System.currentTimeMillis();
+            System.out.println("START: " + joinPoint.toString());
+            try {
+                return joinPoint.proceed();
+            } finally {
+                long finish = System.currentTimeMillis();
+                long timeMs = finish - start;
+                System.out.println("END: " + joinPoint.toString() + " " + timeMs + "ms");
+            }
+        }
+    }
+    ```
+    - 이런식으로 바꾸면 service 하위에 있는 애들만 적용이 됨.
+
+- 스프링의 AOP 동작 방식 설명
+  - AOP 적용 전 의존관계
+    - ![before_aop](./readme_img/before_aop.JPG)
+    - controller에서 service 호출할 때, 그냥 의존 관계를 가지고 호출을 함.
+
+  - AOP 적용 후 의존관계
+    - ![after_aop](./readme_img/after_aop.JPG)
+    - aop가 있으면 가짜 memberService를 만들어 냄(프록시)
+    - spring bin에 등록할 때, 가짜 스프링 빈을 앞에 세워두고 이 가짜 스프링 빈이 끝나면 joinPoint.proceed()를 타서 이때 진짜 memberService를 호출함.
+    - 그러므로 controller가 호출하는 거는 가짜 memberservice(프록시)를 호출하는 거임.
+  - 프록시
+    - 복제를해서 코드를 조작하는 기술
+
+  - AOP 적용 전 전체 그림
+    - ![before_total_aop](./readme_img/before_total_aop.JPG)
   
+  - AOP 적용 후 전체 그림
+    - ![after_total_aop](./readme_img/after_total_aop.JPG)
+
+
+---
+---
+
+## 다음으로
+
+---
+---
+
+### 이때까지 한 내용
+
+- [목차](#목차)
+
+---
+
+### 다음으로
+
+- 지금까지 스프링으로 웹 애플리케이션을 개발하는 방법에 대해서 얇고 넓게 학습했다. 이제부터는 각각의 기술들을 깊이있게 이해해야 한다.
+- 거대한 스프링의 모든 것을 세세하게 알 필요는 없다. 우리는 스프링을 만드는 개발자가 아니다. 스프링을 활용해서 실무에서 발생하는 문제들을 잘 해결하는 것이 훨씬 중요하다. 따라서 핵심 원리를 이해하고, 문제가 발생했을 때, 대략 어디쯤 부터 찾아들어가면 될지, 필요한 부분을 찾아서 사용할 수 있는 능력이 더 중요하다.
+
+- 
+
+
+
 
 ---
